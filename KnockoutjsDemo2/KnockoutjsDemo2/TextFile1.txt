@@ -1,0 +1,176 @@
+﻿@using KnockoutjsDemo2.Models;
+@model KnockoutjsDemo2.Models.Order
+
+@{
+    ViewBag.Title = "Create";
+}
+
+<h2>Create</h2>
+<h3><span data-bind="text: OrderItems().length"></span></h3>
+<h3>Total Amount <span data-bind="text: TotalAmount"></span></h3>
+<div class="orderWrapperRight">
+    	<div class="clr"></div>
+        <table class="table table-striped table-bordered" data-bind="template: { name: 'person-template4', foreach: OrderItems }" >
+        <thead> 
+        	<tr>
+        		<th>Ürün</th>
+        		<th>Adet</th>
+                <th>İşleme</th>
+        		<th></th>
+        	</tr>
+        </thead> 	
+        <tbody>
+        <script id='person-template4' type='text/x-jquery-tmpl'>
+            <tr>
+        		<td>
+      				<input type="text" disabled="disabled" data-bind="value: ProductId()" />
+		        </td>
+                <td>
+	                <input type="number"  data-bind="value: Quantity()" />
+                </td>
+                 <td>
+	                <input type="text" disabled="disabled" data-bind="value: ProcessType()" />
+                </td>
+                <td>
+                	<button class="btn btn-danger" data-bind="click: remove">Sil</button>
+                </td>	
+            </tr>
+        </script>
+        </tbody>
+        </table>
+	</div>    	
+
+
+
+    <fieldset>
+        <legend>Order</legend>
+
+		@Html.Partial("_CreateOrEdit", Model)
+        <h2>Group1</h2>
+        <ul data-bind="template: { name: 'person-template', foreach: Gr1 }" ></ul>
+        <script id='person-template' type='text/x-jquery-tmpl'>
+            <li>
+                <p><span data-bind="text: ImageUrl()"></span></p>
+                <img data-bind="attr:{src: ImageUrl()}, click: add"  />
+            </li>
+        </script>
+
+        <h2>Group2</h2>
+        <ul data-bind="template: { name: 'person-template1', foreach: Gr2 }" ></ul>
+        <script id='person-template1' type='text/x-jquery-tmpl'>
+            <li>
+                <p><span data-bind="text: ImageUrl()"></span></p>
+                <img data-bind="attr:{src: ImageUrl()}, click: add"  />
+            </li>
+        </script>
+
+        <h2>Group3</h2>
+        <ul data-bind="template: { name: 'person-template2', foreach: Gr3 }" ></ul>
+        <script id='person-template2' type='text/x-jquery-tmpl'>
+            <li>
+                <p><span data-bind="text: ImageUrl()"></span></p>
+                <img data-bind="attr:{src: ImageUrl()}, click: add"  />
+            </li>
+        </script>
+
+        
+
+        <p>
+            <input type="submit" value="Create" data-bind="click: addItem"/>
+        </p>
+    </fieldset>
+
+<script src="~/Scripts/jquery-1.8.2.js"></script>
+<script src="~/Scripts/knockout-2.2.0.js"></script>
+<script src="~/Scripts/knockout-2.2.0.debug.js"></script>
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+<script type="text/javascript">
+
+    window.onload = function () {
+        $.ajax(
+             {
+                 url: '@(Url.Action("CreateBundle1"))',
+                type: "get",
+                success: function (result) {
+                    var mappedData = ko.utils.arrayMap(result, function (item)
+                    {
+                        return new product(item.Id, item.Name, item.Price, item.Type, item.ImageUrl);
+                    });
+                    Order.Gr1(mappedData);
+                }
+             });
+        $.ajax(
+            {
+                url: '@(Url.Action("CreateBundle2"))',
+                 type: "get",
+                 success: function (result) {
+                     var mappedData = ko.utils.arrayMap(result, function (item) {
+                         return new product(item.Id, item.Name, item.Price, item.Type,item.ImageUrl);
+                     });
+                     Order.Gr2(mappedData);
+                 }
+            });
+        $.ajax(
+            {
+                url: '@(Url.Action("CreateBundle3"))',
+                 type: "get",
+                 success: function (result) {
+                     var mappedData = ko.utils.arrayMap(result, function (item) {
+                         return new product(item.Id, item.Name, item.Price, item.Type, item.ImageUrl);
+                     });
+                     Order.Gr3(mappedData);
+                 }
+             });
+    };
+
+    function orderDetail(pid, price,pt) {
+        var self = this;
+        this.ProductId = ko.observable(pid);
+        this.ProcessType = ko.observable(pt);
+        this.Price=ko.observable(price);
+        this.Quantity = ko.observable(1);
+        this.remove = function () {
+            Order.OrderItems.remove(this);
+        };
+    }
+
+    function product(id,name,price,type,url) {
+        var self = this;
+        this.Id = ko.observable(id);
+        this.Name = ko.observable(name);
+        this.ImageUrl = ko.observable(url);
+        this.Type = ko.observable(type);
+        this.Price = ko.observable(price);
+        this.add = function () {
+            //Order.OrderItems.push(new orderDetail(this.Id(), this.Price(), this.Type()));
+            Order.addItem(this.Id(), this.Price(), this.Type());
+        };
+        this.remove = function () {
+            Order.OrderItems.remove(this);
+        };
+    }
+
+    var Order ={
+        Gr1: ko.observableArray([]),
+        Gr2: ko.observableArray([]),
+        Gr3: ko.observableArray([]),
+        OrderItems: ko.observableArray([]),
+        addItem: function (pid, price,pt) {
+            this.OrderItems.push(new orderDetail(pid, price,pt));
+        }
+    };
+
+    Order.TotalAmount = ko.computed(function () {
+        var total = 0;
+        for (var i = 0; i < this.OrderItems().length; i++) {
+            //alert(this.OrderItems()[i].Quantity());
+            total += parseFloat(this.OrderItems()[i].Price()) * parseFloat(this.OrderItems()[i].Quantity());
+        }
+        return total;
+    }, Order);
+
+    ko.applyBindings(Order);
+</script>

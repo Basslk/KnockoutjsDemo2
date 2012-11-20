@@ -1,0 +1,26 @@
+@model KnockoutjsDemo2.Models.Order
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<fieldset>
+    <legend>Order</legend>
+
+    <div class="display-label">TotalAmount</div>
+    <div class="display-field">@String.Format("{0:F}", Model.TotalAmount)</div>
+
+    <div class="display-label">OrderDate</div>
+    <div class="display-field">@String.Format("{0:g}", Model.OrderDate)</div>
+
+    <div class="display-label">OrderItems</div>
+    <div class="display-field">@(Model.OrderItems == null ? "None" : Model.OrderItems.Count.ToString())</div>
+</fieldset>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id=Model.Id }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>
+
+
